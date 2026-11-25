@@ -20,6 +20,7 @@ function MainApp() {
   const user = useAuthStore((s) => s.user);
   const hydrate = useChatStore((s) => s.hydrate);
   const view = useViewStore((s) => s.view);
+  const settingsTab = useViewStore((s) => s.settingsTab);
   const toast = useOpenCodeStore((s) => s.toast);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ready, setReady] = useState(false);
@@ -49,6 +50,7 @@ function MainApp() {
         ) : (
           <OpenCodeScreen
             view={view}
+            settingsTab={settingsTab}
             sidebarOpen={sidebarOpen}
             onToggleSidebar={toggleSidebar}
           />

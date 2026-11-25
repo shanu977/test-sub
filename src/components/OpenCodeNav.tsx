@@ -2,7 +2,7 @@
 
 import { useViewStore, type MainView } from "@/store/viewStore";
 import { useOpenCodeStore } from "@/opencode/store";
-import { BotIcon, FolderIcon, MonitorIcon, PulseIcon } from "@/components/icons";
+import { BotIcon, FolderIcon } from "@/components/icons";
 
 interface OpenCodeNavProps {
   /** Called after a nav item is picked (used to close the mobile drawer). */
@@ -10,10 +10,9 @@ interface OpenCodeNavProps {
 }
 
 const ITEMS: Array<{ view: MainView; label: string; Icon: typeof BotIcon }> = [
-  { view: "agent-workspace", label: "Agent workspace", Icon: BotIcon },
+  { view: "agent-workspace", label: "Workspace", Icon: BotIcon },
   { view: "projects", label: "Projects", Icon: FolderIcon },
-  { view: "monitor", label: "Execution monitor", Icon: MonitorIcon },
-  { view: "diagnostics", label: "Diagnostics", Icon: PulseIcon },
+  { view: "plugins", label: "Plugins", Icon: BotIcon },
 ];
 
 /**

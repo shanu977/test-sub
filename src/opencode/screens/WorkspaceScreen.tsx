@@ -508,68 +508,6 @@ export default function WorkspaceScreen({ sidebarOpen, onToggleSidebar }: Worksp
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-3 pt-3">
-            <span className="label mb-0">
-              Sessions ({sessions.length})
-              {showAllSessions ? " · all" : ""}
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                className="btn btn-ghost px-1.5 py-0.5 text-[10px]"
-                onClick={() => setShowAllSessions((v) => !v)}
-                title={showAllSessions ? "Show project sessions only" : "Show all sessions on this instance"}
-              >
-                {showAllSessions ? "project" : "all"}
-              </button>
-              <button
-                className="btn btn-ghost px-1.5 py-0.5"
-                onClick={() => void reloadSessionList()}
-                title="Reload sessions"
-              >
-                ⟳
-              </button>
-            </div>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 pt-1.5">
-            {sessions.length === 0 && (
-              <p className="px-1 py-2 text-[11.5px] text-muted-foreground/70">
-                No sessions in this project yet.
-              </p>
-            )}
-            <ul className="space-y-0.5">
-              {sessions.map((s) => (
-                <li key={s.id}>
-                  <div
-                    className={`group flex w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-left transition-colors ${
-                      s.id === sessionID
-                        ? "border-border bg-accent"
-                        : "border-transparent hover:bg-muted"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      className="min-w-0 flex-1 cursor-pointer"
-                      onClick={() => selectSession(s.id)}
-                    >
-                      <div className="truncate text-[12px] text-foreground">{s.title || s.id}</div>
-                      <div className="truncate font-mono text-[9.5px] text-muted-foreground/70">
-                        {s.id.slice(0, 16)}… {s.agent ? `· ${s.agent}` : ""}
-                        {showAllSessions ? ` · ${s.directory.split(/[\\/]/).pop() ?? ""}` : ""}
-                      </div>
-                    </button>
-                    <button
-                      className="cursor-pointer text-muted-foreground/60 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                      title="Delete session"
-                      onClick={() => void removeSession(s.id)}
-                    >
-                      <XIcon className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
         </aside>
 
         {/* ---------------- CENTER ---------------- */}

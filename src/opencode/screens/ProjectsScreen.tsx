@@ -19,6 +19,7 @@ interface Entry {
 interface ProjectsScreenProps {
   sidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+  embedded?: boolean;
 }
 
 /**
@@ -26,7 +27,7 @@ interface ProjectsScreenProps {
  * Allowed roots, directory browsing, inspection (files, git, working-tree
  * changes) and project selection with server-side containment validation.
  */
-export default function ProjectsScreen({ sidebarOpen, onToggleSidebar }: ProjectsScreenProps) {
+export default function ProjectsScreen({ sidebarOpen, onToggleSidebar, embedded = false }: ProjectsScreenProps) {
   const status = useOpenCodeStore((s) => s.status);
   const refresh = useOpenCodeStore((s) => s.refresh);
   const notify = useOpenCodeStore((s) => s.notify);
@@ -141,13 +142,15 @@ export default function ProjectsScreen({ sidebarOpen, onToggleSidebar }: Project
   }, [root]);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-background text-foreground dark:bg-[#0f0f0f]">
-      <ScreenHeader
-        title="Projects"
-        subtitle={current ? current.split(/[\\/]/).pop() : "no project"}
-        sidebarOpen={sidebarOpen}
-        onToggleSidebar={onToggleSidebar}
-      />
+    <div className={`flex min-h-0 w-full flex-col bg-background text-foreground dark:bg-[#0f0f0f] ${embedded ? "" : "h-full"}`}>
+      {!embedded && (
+        <ScreenHeader
+          title="Projects"
+          subtitle={current ? current.split(/[\\/]/).pop() : "no project"}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={onToggleSidebar}
+        />
+      )}
 
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
         <div className="mx-auto max-w-[1200px] space-y-4">

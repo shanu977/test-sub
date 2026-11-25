@@ -15,10 +15,13 @@ import UsageDashboard from "@/components/UsageDashboard";
 import AccountPanel from "@/components/AccountPanel";
 import ModelsSettings from "@/components/ModelsSettings";
 import OpenCodeSettingsPanel from "@/opencode/components/OpenCodeSettingsPanel";
+import DiagnosticsScreen from "@/opencode/screens/DiagnosticsScreen";
+import ProjectsScreen from "@/opencode/screens/ProjectsScreen";
+import type { SettingsTab } from "@/store/viewStore";
 
 type ApiKeyProvider = "groq" | "gemini" | "openrouter";
 
-export type SettingsTab = "general" | "account" | "keys" | "models" | "usage" | "agents";
+export type { SettingsTab };
 
 const KEY_FIELDS: ApiKeyProvider[] = ["groq", "gemini", "openrouter"];
 
@@ -32,7 +35,7 @@ interface SettingsContentProps {
   initialTab?: SettingsTab;
 }
 
-export default function SettingsContent({ initialTab = "general" }: SettingsContentProps) {
+export default function SettingsContent({ initialTab = "account" }: SettingsContentProps) {
   const theme = useChatStore((s) => s.theme);
   const provider = useChatStore((s) => s.provider);
   const model = useChatStore((s) => s.model);
@@ -179,18 +182,7 @@ export default function SettingsContent({ initialTab = "general" }: SettingsCont
   return (
     <div className="space-y-4 font-sans text-xs text-foreground">
       {/* Segmented Tab Navigation */}
-      <div className="flex rounded-xl bg-muted p-1 border border-border">
-        <button
-          type="button"
-          onClick={() => setActiveTab("general")}
-          className={`flex-1 rounded-lg py-1.5 font-mono text-[11px] font-medium transition-all ${
-            activeTab === "general"
-              ? "bg-card text-foreground border border-border shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Preferences
-        </button>
+      <div className="flex flex-wrap rounded-xl bg-muted p-1 border border-border">
         <button
           type="button"
           onClick={() => setActiveTab("account")}
@@ -201,28 +193,6 @@ export default function SettingsContent({ initialTab = "general" }: SettingsCont
           }`}
         >
           Account
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("keys")}
-          className={`flex-1 rounded-lg py-1.5 font-mono text-[11px] font-medium transition-all ${
-            activeTab === "keys"
-              ? "bg-card text-foreground border border-border shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          API Keys
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("models")}
-          className={`flex-1 rounded-lg py-1.5 font-mono text-[11px] font-medium transition-all ${
-            activeTab === "models"
-              ? "bg-card text-foreground border border-border shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Models
         </button>
         <button
           type="button"
@@ -244,87 +214,29 @@ export default function SettingsContent({ initialTab = "general" }: SettingsCont
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Agents
+          Agent
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("path")}
+          className={`flex-1 rounded-lg py-1.5 font-mono text-[11px] font-medium transition-all ${activeTab === "path" ? "bg-card text-foreground border border-border shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Path
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("diagnostics")}
+          className={`flex-1 rounded-lg py-1.5 font-mono text-[11px] font-medium transition-all ${activeTab === "diagnostics" ? "bg-card text-foreground border border-border shadow-xs" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Diagnostics
         </button>
       </div>
-
-      {/* TAB 1: PREFERENCES */}
-      {activeTab === "general" && (
-        <div className="space-y-4">
-          <section className="rounded-xl border border-border bg-card p-3.5 space-y-3 shadow-xs">
-            <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-              Provider &amp; Model Selection
-            </h4>
-            
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-foreground">Provider</label>
-              <select
-                value={provider}
-                onChange={(e) => setProvider(e.target.value as ProviderType)}
-                className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-ring"
-              >
-                {providers.map((p) => (
-                  <option key={p} value={p}>
-                    {PROVIDER_LABELS[p]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-foreground">Model</label>
-              {provider === "local" && localModels.filter((m) => m.enabled).length === 0 ? (
-                <div className="rounded-xl border border-dashed border-border bg-muted/50 px-3 py-3 text-xs text-muted-foreground">
-                  No local models configured. Add one in the Models tab.
-                </div>
-              ) : (
-                <select
-                  value={modelOptions.some((m) => m.id === model) ? model : (provider === "local" ? (modelOptions[0]?.id ?? "") : DEFAULT_PROVIDER_MODELS[provider as Exclude<ProviderType, "local">])}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-ring"
-                >
-                  {modelOptions.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {(m as { badge?: string; label: string }).badge ? `${m.label} (${(m as { badge?: string }).badge})` : m.label}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {provider === "local" && localModels.filter((m) => m.enabled).length === 0 && (
-                <p className="text-[11px] font-mono text-amber-500">Local models are required to chat locally without cloud API keys.</p>
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-xl border border-border bg-card p-3.5 space-y-2.5 shadow-xs">
-            <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-              Appearance
-            </h4>
-            <div className="flex rounded-xl bg-muted p-1 border border-border">
-              {(["light", "dark"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => void setTheme(t)}
-                  className={`flex-1 rounded-lg py-1.5 text-xs font-semibold capitalize transition-colors ${
-                    theme === t
-                      ? "bg-card text-foreground border border-border shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
-      )}
 
       {/* TAB 1.5: ACCOUNT */}
       {activeTab === "account" && <AccountPanel />}
 
-      {/* TAB 2: API KEYS */}
-      {activeTab === "keys" && (
+      {/* Legacy API key implementation remains available to the service layer, but is no longer surfaced here. */}
+      {false && activeTab === "general" && (
         <div className="space-y-3">
           {KEY_FIELDS.map((field) => {
             const status = keyStatus[field];
@@ -423,7 +335,7 @@ export default function SettingsContent({ initialTab = "general" }: SettingsCont
       )}
 
       {/* TAB 2.5: MODELS — local providers participate in the same Provider > Model picker as cloud providers */}
-      {activeTab === "models" && <ModelsSettings />}
+      {false && activeTab === "general" && <ModelsSettings />}
 
       {/* TAB 3: USAGE */}
       {activeTab === "usage" && (
@@ -434,6 +346,10 @@ export default function SettingsContent({ initialTab = "general" }: SettingsCont
 
       {/* TAB 4: AGENTS — OpenCode runtime (migrated Nexuss Lab) */}
       {activeTab === "agents" && <OpenCodeSettingsPanel />}
+
+      {activeTab === "path" && <ProjectsScreen embedded />}
+
+      {activeTab === "diagnostics" && <DiagnosticsScreen />}
     </div>
   );
 }

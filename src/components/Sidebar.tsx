@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useWorkspaceStore } from "@/workspace/store";
 import RenameModal from "@/components/RenameModal";
 import DeleteModal from "@/components/DeleteModal";
-import Settings, { SettingsTab } from "@/components/Settings";
+import type { SettingsTab } from "@/store/viewStore";
 import SidebarNavigation from "@/components/SidebarNavigation";
 import OpenCodeNav from "@/components/OpenCodeNav";
 import RecentChats from "@/components/RecentChats";
@@ -14,11 +14,10 @@ import UserProfile from "@/components/UserProfile";
 import {
   SearchIcon,
   PanelLeftIcon,
-  SettingsIcon,
-  LogOutIcon
 } from "@/components/icons";
 import { Chat } from "@/types";
 import { hasNestedEscapeOverlay } from "@/utils";
+import { useViewStore } from "@/store/viewStore";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -36,16 +35,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const [renameTarget, setRenameTarget] = useState<Chat | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Chat | null>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<SettingsTab>("general");
+  const setView = useViewStore((s) => s.setView);
+  const setSettingsTab = useViewStore((s) => s.setSettingsTab);
 
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const workspace = useWorkspaceStore((s) => s.workspace);
 
-  const openSettings = (tab: SettingsTab = "general") => {
+  const openSettings = (tab: SettingsTab = "account") => {
     setSettingsTab(tab);
-    setSettingsOpen(true);
+    setView("settings");
   };
 
   // Debounced conversation search.
@@ -92,7 +91,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const handleSelectChat = (id: string) => {
-    loadChat(id);
+    // Recent chats belong to the main chat view. Switching the selected chat
+    // must also leave whichever agent/settings surface is currently shown.
+    void loadChat(id);
+    setView("chat");
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       onClose();
     }
@@ -166,36 +168,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           onNewChat={() => void handleNewChat()}
         />
 
-        {/* Footer: permanent Settings/Log out actions + user profile */}
+        {/* Footer: user profile */}
         <div className="border-t border-border p-2.5 shrink-0">
-          <div className="space-y-1">
-            <button
-              type="button"
-              onClick={() => openSettings("general")}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
-              title="Settings"
-            >
-              <SettingsIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span>Settings</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => void signOut()}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 cursor-pointer"
-              title="Log out"
-            >
-              <LogOutIcon className="h-4 w-4 shrink-0" />
-              <span>Log out</span>
-            </button>
-          </div>
-          <div className="mx-1 my-2 h-px bg-border" />
           <UserProfile
             email={userEmail}
             avatarChar={avatarChar}
             name={user?.displayName || undefined}
             workspaceName={workspace?.name ?? null}
             onOpenAccount={() => openSettings("account")}
-            onOpenSettings={() => openSettings("general")}
+            onOpenSettings={() => openSettings("account")}
             onSignOut={() => void signOut()}
           />
         </div>
@@ -221,12 +202,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Settings Modal */}
-      <Settings
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        initialTab={settingsTab}
-      />
     </>
   );
 }

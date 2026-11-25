@@ -9,11 +9,11 @@ export type { SettingsTab };
 interface SettingsProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Tab to show when the modal opens (defaults to Preferences). */
+  /** Tab to show when the settings surface opens. */
   initialTab?: SettingsTab;
 }
 
-export default function Settings({ isOpen, onClose, initialTab = "general" }: SettingsProps) {
+export default function Settings({ isOpen, onClose, initialTab = "account" }: SettingsProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
